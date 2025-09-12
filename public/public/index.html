@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Plan9 Shared Table</title>
+</head>
+<body>
+  <h1>Общая таблица</h1>
+  <p>Все изменения сохраняются автоматически.</p>
+  <table border="1" id="table">
+    <tr>
+      <td contenteditable="true" data-cell="A1"></td>
+      <td contenteditable="true" data-cell="A2"></td>
+    </tr>
+    <tr>
+      <td contenteditable="true" data-cell="B1"></td>
+      <td contenteditable="true" data-cell="B2"></td>
+    </tr>
+  </table>
+
+  <script>
+    const token = window.location.pathname.split("/").pop();
+    let data = { cells: {} };
+
+    async function loadData() {
+      const res = await fetch(`/data/${token}`);
+      if (res.ok) {
+        data = await res.json();
+        for (const [cell, value] of Object.entries(data.cells)) {
+          const td = document.querySelector(`[data-cell="${cell}"]`);
+          if (td) td.innerText = value;
+        }
+      }
+    }
+
+    async function saveData() {
+      document.querySelectorAll("[data-cell]").forEach(td => {
+        data.cells[td.dataset.cell] = td.innerText;
+      });
+      await fetch(`/data/${token}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+    }
+
+    document.addEventListener("input", () => {
+      saveData();
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
