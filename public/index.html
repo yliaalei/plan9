@@ -1,0 +1,40 @@
+<script>
+    const API_URL = "/api/events"; // Render сам отдаст из того же домена
+
+    // Загружаем все события
+    async function fetchEvents() {
+        const res = await fetch(API_URL);
+        return await res.json();
+    }
+
+    // Сохраняем событие
+    async function saveEvent(dateKey, data) {
+        await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ date: dateKey, data })
+        });
+    }
+
+    // Пример: замена в saveThemeData()
+    async function saveThemeData() {
+        if (!selectedDate) return;
+        const theme = document.getElementById('theme-select').value;
+        const title = document.getElementById('title').value;
+        const goal = document.getElementById('goal').value;
+        const activity = document.getElementById('activity').value;
+
+        const dateKey = formatDate(selectedDate);
+        let data = { theme, themeData: { theme, title, goal, activity } };
+
+        await saveEvent(dateKey, data);
+        updateCalendarDayColor(dateKey, theme);
+        showSavedNotification();
+    }
+
+    // При старте — загружаем события с сервера и рисуем календарь
+    async function renderCalendar() {
+        const allEvents = await fetchEvents();
+        // ... твой код отрисовки, только вместо localStorage используем allEvents
+    }
+</script>
