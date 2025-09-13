@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title><!doctype html>
+<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8" />
@@ -776,25 +772,5 @@
 
 })();
 </script>
-</body>
-</html>
-</title>
-<style>
-  body { font-family: sans-serif; margin: 20px; text-align: center; }
-  button { padding: 10px 20px; font-size: 18px; cursor: pointer; }
-</style>
-</head>
-<body>
-  <h1>Добро пожаловать в Plan9 Live Editor</h1>
-  <p>Создайте новый документ и поделитесь ссылкой с друзьями.</p>
-  <button onclick="createDoc()">Создать документ</button>
-
-  <script>
-    async function createDoc() {
-      const res = await fetch("/create", { method: "POST" });
-      const data = await res.json();
-      window.location.href = data.link;
-    }
-  </script>
 </body>
 </html>
