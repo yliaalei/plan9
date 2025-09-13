@@ -4,13 +4,21 @@
 <meta charset="UTF-8">
 <title>Plan9 Live Editor</title>
 <style>
-  body { font-family: sans-serif; margin: 20px; }
-  #editor { width: 100%; height: 80vh; border: 1px solid #ccc; padding: 10px; font-family: monospace; white-space: pre-wrap; overflow-wrap: break-word; }
+  body { font-family: sans-serif; margin: 20px; text-align: center; }
+  button { padding: 10px 20px; font-size: 18px; cursor: pointer; }
 </style>
 </head>
 <body>
-<h1>Live Документ (Google Docs-like)</h1>
-<div id="editor" contenteditable="true"></div>
-<script src="script.js"></script>
+  <h1>Добро пожаловать в Plan9 Live Editor</h1>
+  <p>Создайте новый документ и поделитесь ссылкой с друзьями.</p>
+  <button onclick="createDoc()">Создать документ</button>
+
+  <script>
+    async function createDoc() {
+      const res = await fetch("/create", { method: "POST" });
+      const data = await res.json();
+      window.location.href = data.link;
+    }
+  </script>
 </body>
 </html>
