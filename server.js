@@ -1,6 +1,8 @@
 const express = require("express");
 const { WebSocketServer } = require("ws");
 const http = require("http");
+const { v4: uuidv4 } = require("uuid");
+const path = require("path");
 
 const app = express();
 app.use(express.static("public"));
@@ -40,10 +42,14 @@ wss.on("connection", (ws, req) => {
 
 // HTTP endpoint для создания нового документа
 app.post("/create", (req, res) => {
-  const { v4: uuidv4 } = require("uuid");
   const token = uuidv4();
   docs[token] = { text: "Начни писать...", clients: new Set() };
   res.json({ link: `/view/${token}` });
+});
+
+// Роут для отображения редактора по токену
+app.get("/view/:token", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "editor.html"));
 });
 
 server.listen(process.env.PORT || 3000, () => console.log("Server running"));
