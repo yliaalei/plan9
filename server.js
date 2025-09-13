@@ -1,38 +1,49 @@
-// server.js
 const express = require("express");
-const bodyParser = require("body-parser");
-const { v4: uuidv4 } = require("uuid");
+const { WebSocketServer } = require("ws");
+const http = require("http");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+app.use(express.static("public"));
 
-app.use(bodyParser.json());
-app.use(express.static("public")); // папка с фронтендом
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
 
-// временное хранилище данных (можно заменить на базу)
-const docs = {};
+let docs = {}; // { token: { text: "", clients: Set() } }
 
-// создать новый документ
+wss.on("connection", (ws, req) => {
+  const token = req.url.split("/").pop();
+
+  if (!docs[token]) docs[token] = { text: "Начни писать...", clients: new Set() };
+  const doc = docs[token];
+  doc.clients.add(ws);
+
+  // Отправляем текущий текст новому клиенту
+  ws.send(JSON.stringify({ text: doc.text }));
+
+  ws.on("message", (msg) => {
+    const data = JSON.parse(msg);
+    if (data.text !== undefined) {
+      doc.text = data.text;
+      // Рассылаем всем остальным
+      doc.clients.forEach(client => {
+        if (client !== ws && client.readyState === 1) {
+          client.send(JSON.stringify({ text: doc.text }));
+        }
+      });
+    }
+  });
+
+  ws.on("close", () => {
+    doc.clients.delete(ws);
+  });
+});
+
+// HTTP endpoint для создания нового документа
 app.post("/create", (req, res) => {
+  const { v4: uuidv4 } = require("uuid");
   const token = uuidv4();
-  docs[token] = { cells: {} };
+  docs[token] = { text: "Начни писать...", clients: new Set() };
   res.json({ link: `/view/${token}` });
 });
 
-// получить данные документа
-app.get("/data/:token", (req, res) => {
-  const token = req.params.token;
-  if (!docs[token]) return res.status(404).json({ error: "not found" });
-  res.json(docs[token]);
-});
-
-// обновить данные
-app.post("/data/:token", (req, res) => {
-  const token = req.params.token;
-  if (!docs[token]) return res.status(404).json({ error: "not found" });
-
-  docs[token] = req.body;
-  res.json({ status: "ok" });
-});
-
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+server.listen(process.env.PORT || 3000, () => console.log("Server running"));
