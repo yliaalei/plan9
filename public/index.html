@@ -1,40 +1,97 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Учёт посещаемости</title>
+  <meta charset="UTF-8">
+  <title>Журнал посещений йога-практик</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
-    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-    td, th { border: 1px solid #ccc; padding: 6px; text-align: center; }
-    th { background: #f5f5f5; }
-    button { margin-top: 15px; padding: 8px 14px; cursor: pointer; border: none; border-radius: 6px; background: #4caf50; color: white; }
-    button:hover { background: #45a049; }
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #aaa; padding: 0.4rem; text-align: center; }
+    th { background: #f3f3f3; }
+    input[type="date"] { width: 100%; }
+    input[type="text"] { width: 100%; }
+    .present { width: 20px; height: 20px; }
   </style>
 </head>
 <body>
-  <h1>Учёт посещаемости участников</h1>
 
-  <label>ФИ участника: <input type="text" id="name" placeholder="Введите ФИ" /></label>
+<h2>Журнал посещений йога-практик</h2>
 
-  <table id="attendanceTable">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Дата</th>
-        <th>Посещение</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
+<table id="attendanceTable">
+  <thead>
+    <tr id="headerRow">
+      <th>ФИ участника</th>
+      <!-- Даты 2–9 -->
+      <th colspan="8">Даты практик</th>
+      <th>Итог</th>
+    </tr>
+    <tr id="dateRow">
+      <td></td>
+      <!-- Поля дат -->
+    </tr>
+  </thead>
+  <tbody id="tableBody">
+    <!-- Участники -->
+  </tbody>
+</table>
 
-  <p>Итого посещений: <span id="total">0</span></p>
-  <p>Статус: <strong id="label"></strong></p>
+<script>
+  const tableBody = document.getElementById('tableBody');
+  const dateRow = document.getElementById('dateRow');
 
-  <button id="saveBtn">Сохранить в Firebase</button>
-  <button id="clearBtn" style="background:#e53935;">Очистить</button>
+  // === Создание 8 полей для ввода дат в верхней строке ===
+  for (let i = 1; i <= 8; i++) {
+    const td = document.createElement('td');
+    td.innerHTML = `<input type="date" id="date-${i}">`;
+    dateRow.appendChild(td);
+  }
 
-  <script type="module" src="../src/script.js"></script>
+  // Добавляем пустую ячейку под "итог"
+  dateRow.appendChild(document.createElement('td'));
+
+  // === Создаем 14 строк для участников (2–15) ===
+  for (let row = 1; row <= 14; row++) {
+    const tr = document.createElement('tr');
+
+    // 1-я ячейка — ФИ
+    const nameTd = document.createElement('td');
+    nameTd.innerHTML = `<input type="text" id="name-${row}" placeholder="ФИ">`;
+    tr.appendChild(nameTd);
+
+    // 2–9 ячейки — чекбоксы посещений
+    for (let col = 1; col <= 8; col++) {
+      const td = document.createElement('td');
+      td.innerHTML = `<input type="checkbox" class="present" data-row="${row}" data-col="${col}">`;
+      tr.appendChild(td);
+    }
+
+    // 10-я ячейка — результат
+    const resultTd = document.createElement('td');
+    resultTd.id = `result-${row}`;
+    resultTd.textContent = '—';
+    tr.appendChild(resultTd);
+
+    tableBody.appendChild(tr);
+  }
+
+  // === Функция расчёта метки ===
+  function calculateLabel(count) {
+    if ([6, 7, 8].includes(count)) return 'Мастер баланса';
+    if (count === 4) return 'Йога путешественник';
+    if ([2, 3].includes(count)) return 'Мастер гибкий график';
+    return '—';
+  }
+
+  // === Обработчик изменения чекбоксов ===
+  document.querySelectorAll('.present').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      const row = e.target.dataset.row;
+      const checkboxes = document.querySelectorAll(`.present[data-row="${row}"]`);
+      const count = Array.from(checkboxes).filter(x => x.checked).length;
+      document.getElementById(`result-${row}`).textContent = calculateLabel(count);
+    });
+  });
+</script>
+
 </body>
 </html>
