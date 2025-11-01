@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Оплата успешна</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+  <main class="card center">
+    <h1>Оплата прошла успешно 🎉</h1>
+    <p>Сейчас перенаправим вас в приложение…</p>
+    <p class="small" id="info"></p>
+    <a id="go" class="button" href="#">Перейти вручную</a>
+  </main>
+
+  <script src="./js/config.js"></script>
+  <script>
+    const C = window.APP_CONFIG || {};
+    const params = new URLSearchParams(location.search);
+    // Из редиректа Т‑Банк могут приехать orderId/PaymentId/Success и т.п.
+    const orderId = params.get('orderId');
+    document.getElementById('info').textContent = orderId ? `Номер заказа: ${orderId}` : '';
+
+    // Куда вести пользователя
+    const target = C.APP_URL;
+    const go = document.getElementById('go');
+    go.href = target;
+
+    setTimeout(() => { location.href = target; }, C.SUCCESS_REDIRECT_DELAY_MS || 1000);
+  </script>
+</body>
+</html>
