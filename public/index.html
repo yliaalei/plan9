@@ -1,97 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Журнал посещений йога-практик</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 2rem; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #aaa; padding: 0.4rem; text-align: center; }
-    th { background: #f3f3f3; }
-    input[type="date"] { width: 100%; }
-    input[type="text"] { width: 100%; }
-    .present { width: 20px; height: 20px; }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Оплата доступа</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+  <meta name="color-scheme" content="dark light" />
 </head>
 <body>
+  <main class="card">
+    <h1>Доступ к онлайн‑приложению</h1>
+    <p>Оплатите доступ — и мы сразу перенаправим вас в приложение.</p>
 
-<h2>Журнал посещений йога-практик</h2>
+    <!-- Контейнер под официальный виджет Т‑Банк (T‑Pay / СБП / и т.д.) -->
+    <div id="paymentContainer" class="center"></div>
 
-<table id="attendanceTable">
-  <thead>
-    <tr id="headerRow">
-      <th>ФИ участника</th>
-      <!-- Даты 2–9 -->
-      <th colspan="8">Даты практик</th>
-      <th>Итог</th>
-    </tr>
-    <tr id="dateRow">
-      <td></td>
-      <!-- Поля дат -->
-    </tr>
-  </thead>
-  <tbody id="tableBody">
-    <!-- Участники -->
-  </tbody>
-</table>
+    <!-- Фолбэк-кнопка "Оплата" (используется, если выбран режим без виджета) -->
+    <div class="center">
+      <a id="payLink" class="button hidden" href="#">Оплата</a>
+    </div>
 
-<script>
-  const tableBody = document.getElementById('tableBody');
-  const dateRow = document.getElementById('dateRow');
+    <div class="hr"></div>
+    <p class="small">Оплата проводится через Т‑Банк. После успешного платежа вы будете перенаправлены в приложение.</p>
+  </main>
 
-  // === Создание 8 полей для ввода дат в верхней строке ===
-  for (let i = 1; i <= 8; i++) {
-    const td = document.createElement('td');
-    td.innerHTML = `<input type="date" id="date-${i}">`;
-    dateRow.appendChild(td);
-  }
+  <!-- Конфиг и логика -->
+  <script src="./js/config.js"></script>
+  <script src="./js/app.js"></script>
 
-  // Добавляем пустую ячейку под "итог"
-  dateRow.appendChild(document.createElement('td'));
-
-  // === Создаем 14 строк для участников (2–15) ===
-  for (let row = 1; row <= 14; row++) {
-    const tr = document.createElement('tr');
-
-    // 1-я ячейка — ФИ
-    const nameTd = document.createElement('td');
-    nameTd.innerHTML = `<input type="text" id="name-${row}" placeholder="ФИ">`;
-    tr.appendChild(nameTd);
-
-    // 2–9 ячейки — чекбоксы посещений
-    for (let col = 1; col <= 8; col++) {
-      const td = document.createElement('td');
-      td.innerHTML = `<input type="checkbox" class="present" data-row="${row}" data-col="${col}">`;
-      tr.appendChild(td);
-    }
-
-    // 10-я ячейка — результат
-    const resultTd = document.createElement('td');
-    resultTd.id = `result-${row}`;
-    resultTd.textContent = '—';
-    tr.appendChild(resultTd);
-
-    tableBody.appendChild(tr);
-  }
-
-  // === Функция расчёта метки ===
-  function calculateLabel(count) {
-    if ([6, 7, 8].includes(count)) return 'Мастер баланса';
-    if (count === 4) return 'Йога путешественник';
-    if ([2, 3].includes(count)) return 'Мастер гибкий график';
-    return '—';
-  }
-
-  // === Обработчик изменения чекбоксов ===
-  document.querySelectorAll('.present').forEach(cb => {
-    cb.addEventListener('change', (e) => {
-      const row = e.target.dataset.row;
-      const checkboxes = document.querySelectorAll(`.present[data-row="${row}"]`);
-      const count = Array.from(checkboxes).filter(x => x.checked).length;
-      document.getElementById(`result-${row}`).textContent = calculateLabel(count);
-    });
-  });
-</script>
-
+  <!-- Официальный Integration.js (подключится только если нужен виджет) -->
+  <script
+    id="tbank-integration"
+    src="https://integrationjs.tbank.ru/integration.js"
+    onload="window.onPaymentIntegrationLoad && window.onPaymentIntegrationLoad()"
+    async defer
+  ></script>
 </body>
 </html>
